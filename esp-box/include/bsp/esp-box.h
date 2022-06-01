@@ -11,6 +11,7 @@
 #include "driver/i2c.h"
 #include "driver/i2s.h"
 #include "soc/usb_pins.h"
+#include "icm42670.h"
 
 /**************************************************************************************************
  *  ESP-BOX pinout
@@ -276,6 +277,19 @@ esp_err_t bsp_button_init(const bsp_button_t btn);
  * @return false Button released
  */
 bool bsp_button_get(const bsp_button_t btn);
+
+/**************************************************************************************************
+ *
+ * TDK ICM42670 6-Axis MotionTracking (Accelerometer and Gyroscope)
+ *
+ **************************************************************************************************/
+
+/**
+ * @brief Initialize accelerometer and gyroscope
+ *
+ * @return handle to icm42670
+ */
+icm42670_handle_t bsp_imu_init(void);
 
 #ifdef __cplusplus
 }
