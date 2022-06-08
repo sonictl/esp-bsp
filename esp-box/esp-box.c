@@ -378,19 +378,15 @@ icm42670_handle_t bsp_imu_init(void)
 
     ESP_LOGI(TAG, "ICM42670 device ID: 0x%02x", dev_id);
 
-    /* Initialize ICM42670 */
-    //err = icm42670_init(handle);
-    //ESP_ERROR_CHECK(err);
-
     /* Configuration of the acceleremeter and gyroscope */
-    /*const icm42670_cfg_t imu_cfg = {
+    const icm42670_cfg_t imu_cfg = {
         .acce_fs = ACCE_FS_4G,
         .acce_odr = ACCE_ODR_400HZ,
         .gyro_fs = GYRO_FS_2000DPS,
         .gyro_odr = GYRO_ODR_400HZ,
     };
     err = icm42670_config(handle, &imu_cfg);
-    ESP_ERROR_CHECK(err);*/
+    ESP_ERROR_CHECK(err);
 
     return handle;
 }
