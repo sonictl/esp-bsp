@@ -20,6 +20,7 @@
 #include "app_disp_fs.h"
 #include "es8311.h"
 #include "jpeg_decoder.h"
+#include "png.h"
 
 /* SPIFFS mount root */
 #define FS_MNT_PATH  "/root"
@@ -41,7 +42,8 @@ static i2s_chan_handle_t i2s_tx_chan;
 typedef enum {
     APP_FILE_TYPE_UNKNOWN,
     APP_FILE_TYPE_TXT,
-    APP_FILE_TYPE_IMG,
+    APP_FILE_TYPE_JPG,
+    APP_FILE_TYPE_PNG,
     APP_FILE_TYPE_WAV,
 } app_file_type_t;
 
@@ -213,12 +215,12 @@ static void show_window(const char *path, app_file_type_t type)
     lv_label_set_text(label, "");
     lv_obj_center(label);
 
-    if (type == APP_FILE_TYPE_IMG) {
+    if (type == APP_FILE_TYPE_JPG || type == APP_FILE_TYPE_PNG) {
         fs_img = lv_canvas_create(cont);
     }
 
     /* Show image or text file */
-    if (type == APP_FILE_TYPE_TXT || type == APP_FILE_TYPE_IMG) {
+    if (type == APP_FILE_TYPE_TXT || type == APP_FILE_TYPE_JPG) {
         /* Get file size */
         int f = stat(path, &st);
         if (f == 0) {
@@ -237,7 +239,7 @@ static void show_window(const char *path, app_file_type_t type)
                 if (type == APP_FILE_TYPE_TXT && label) {
                     file_buf[filesize] = 0;
                     lv_label_set_text(label, file_buf);
-                } else if (fs_img) {
+                } else if (fs_img && type == APP_FILE_TYPE_JPG) {
                     ESP_LOGI(TAG, "Decoding JPEG image...");
                     /* JPEG decode */
                     esp_jpeg_image_cfg_t jpeg_cfg = {
@@ -267,6 +269,22 @@ static void show_window(const char *path, app_file_type_t type)
             free(file_buf);
         } else {
             lv_label_set_text(label, "File not found!");
+        }
+    } else if (type == APP_FILE_TYPE_PNG) {
+        png_image image = {
+            .version = PNG_IMAGE_VERSION,
+        };
+        if (png_image_begin_read_from_file(&image, path) != 0) {
+            image.format = PNG_FORMAT_BGR;
+            if (fs_img && png_image_finish_read(&image, NULL, file_buffer, 0, NULL) != 0) {
+                ESP_LOGI(TAG, "PNG image size: %dx%d", image.width, image.height);
+
+                lv_canvas_set_buffer(fs_img, file_buffer, image.width, image.height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+                lv_obj_center(fs_img);
+                lv_obj_invalidate(fs_img);
+            }
+        } else {
+            lv_label_set_text(label, "Error in reading PNG file!");
         }
     } else if (label) {
         lv_label_set_text(label, "Unsupported file type!");
@@ -487,7 +505,9 @@ static app_file_type_t get_file_type(const char *filepath)
         if (filepath[i] == '.') {
 
             if (strcmp(&filepath[i + 1], "JPG") == 0 || strcmp(&filepath[i + 1], "jpg") == 0) {
-                return APP_FILE_TYPE_IMG;
+                return APP_FILE_TYPE_JPG;
+            } else if (strcmp(&filepath[i + 1], "PNG") == 0 || strcmp(&filepath[i + 1], "png") == 0) {
+                return APP_FILE_TYPE_PNG;
             } else if (strcmp(&filepath[i + 1], "TXT") == 0 || strcmp(&filepath[i + 1], "txt") == 0) {
                 return APP_FILE_TYPE_TXT;
             } else if (strcmp(&filepath[i + 1], "WAV") == 0 || strcmp(&filepath[i + 1], "wav") == 0) {
@@ -569,7 +589,8 @@ static void app_lvgl_add_file(const char *filename)
 
     /* File icon by type */
     switch (filetype) {
-    case APP_FILE_TYPE_IMG:
+    case APP_FILE_TYPE_JPG:
+    case APP_FILE_TYPE_PNG:
         icon = LV_SYMBOL_IMAGE;
         break;
     case APP_FILE_TYPE_WAV:
