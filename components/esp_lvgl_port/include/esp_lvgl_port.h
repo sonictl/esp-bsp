@@ -105,6 +105,24 @@ typedef struct {
 } lvgl_port_nav_btns_cfg_t;
 #endif
 
+#if __has_include ("usb/hid_host.h")
+/**
+ * @brief Configuration of the mouse input
+ */
+typedef struct {
+    lv_disp_t *disp;        /*!< LVGL display handle (returned from lvgl_port_add_disp) */
+    uint8_t sensitivity;    /*!< Mouse sensitivity (cannot be zero) */
+    lv_obj_t *cursor_img;   /*!< Mouse cursor image, if NULL then used default */
+} lvgl_port_hid_mouse_cfg_t;
+
+/**
+ * @brief Configuration of the keyboard input
+ */
+typedef struct {
+    lv_disp_t *disp;        /*!< LVGL display handle (returned from lvgl_port_add_disp) */
+} lvgl_port_hid_keyboard_cfg_t;
+#endif
+
 /**
  * @brief LVGL port configuration structure
  *
@@ -226,6 +244,39 @@ lv_indev_t *lvgl_port_add_navigation_buttons(const lvgl_port_nav_btns_cfg_t *but
  *      - ESP_OK                    on success
  */
 esp_err_t lvgl_port_remove_navigation_buttons(lv_indev_t *buttons);
+#endif
+
+
+#if __has_include ("usb/hid_host.h")
+/**
+ * @brief Add USB HID mouse as an input device
+ *
+ * @note The USB host must be initialized before. Use `usb_host_install` for host initialization.
+ *
+ * @param mouse_cfg mouse configuration structure
+ * @return Pointer to LVGL buttons input device or NULL when error occured
+ */
+lv_indev_t *lvgl_port_add_usb_hid_mouse_input(const lvgl_port_hid_mouse_cfg_t *mouse_cfg);
+
+/**
+ * @brief Add USB HID keyboard as an input device
+ *
+ * @note The USB host must be initialized before. Use `usb_host_install` for host initialization.
+ *
+ * @param keyboard_cfg keyboard configuration structure
+ * @return Pointer to LVGL buttons input device or NULL when error occured
+ */
+lv_indev_t *lvgl_port_add_usb_hid_keyboard_input(const lvgl_port_hid_keyboard_cfg_t *keyboard_cfg);
+
+/**
+ * @brief Remove selected USB HID from input devices
+ *
+ * @note Free all memory used for this input device. When removed all HID devices, the HID task will be freed.
+ *
+ * @return
+ *      - ESP_OK                    on success
+ */
+esp_err_t lvgl_port_remove_usb_hid_input(lv_indev_t *hid);
 #endif
 
 /**
