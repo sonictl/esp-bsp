@@ -18,6 +18,7 @@ void app_main(void)
     ESP_LOGI("example", "Display LVGL animation");
     bsp_display_lock(0);
     lv_obj_t *scr = lv_disp_get_scr_act(NULL);
+    lv_obj_set_style_bg_color(scr, lv_color_make(0x00, 0xFF, 0x00), 0);
     example_lvgl_demo_ui(scr);
 
     bsp_display_unlock();
