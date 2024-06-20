@@ -27,7 +27,7 @@ idf_component_register(
         INCLUDE_DIRS "include" 
         PRIV_INCLUDE_DIRS "priv_include"
         REQUIRES "esp_lcd" 
-        PRIV_REQUIRES "esp_timer")
+        PRIV_REQUIRES "esp_timer esp_driver_ppa")
 
 set(ADD_SRCS "")
 set(ADD_LIBS "")

@@ -104,7 +104,7 @@ lv_display_t *lvgl_port_add_disp(const lvgl_port_display_cfg_t *disp_cfg);
  * @param dsi_cfg MIPI-DSI display specific configuration structure
  * @return Pointer to LVGL display or NULL when error occurred
  */
-lv_display_t *lvgl_port_add_disp_dsi(const lvgl_port_display_cfg_t *disp_cfg, const lvgl_port_display_dsi_cfg_t *dsi_cfg);
+lv_display_t *lvgl_port_add_disp_dsi(lvgl_port_display_cfg_t *disp_cfg, const lvgl_port_display_dsi_cfg_t *dsi_cfg);
 
 /**
  * @brief Add RGB display handling to LVGL

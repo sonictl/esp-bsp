@@ -227,6 +227,8 @@ void app_main(void)
     /* Add and show objects on display */
     app_lvgl_display();
 
+    bsp_display_rotate(display, rotation);
+
     ESP_LOGI(TAG, "Example initialization done.");
 
 #if BSP_CAPS_IMU
