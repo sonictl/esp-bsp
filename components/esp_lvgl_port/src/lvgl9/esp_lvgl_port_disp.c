@@ -168,7 +168,9 @@ lv_display_t *lvgl_port_add_disp_dsi(lvgl_port_display_cfg_t *disp_cfg, const lv
     lvgl_port_unlock();
 
 
+#if SOC_PPA_SUPPORTED
 err:
+#endif
     if (ret != ESP_OK) {
         lvgl_port_remove_disp(disp);
     }
@@ -591,12 +593,11 @@ static void lvgl_port_flush_callback(lv_display_t *drv, const lv_area_t *area, u
 static void lvgl_port_disp_rotation_update(lvgl_port_display_ctx_t *disp_ctx)
 {
     assert(disp_ctx != NULL);
-    esp_lcd_panel_handle_t control_handle = (disp_ctx->control_handle ? disp_ctx->control_handle : disp_ctx->panel_handle);
-
 
 #if SOC_PPA_SUPPORTED
     disp_ctx->ppa_rotation = lv_display_get_rotation(disp_ctx->disp_drv);
 #else
+    esp_lcd_panel_handle_t control_handle = (disp_ctx->control_handle ? disp_ctx->control_handle : disp_ctx->panel_handle);
     /* Solve rotation screen and touch */
     switch (lv_display_get_rotation(disp_ctx->disp_drv)) {
     case LV_DISPLAY_ROTATION_0:
