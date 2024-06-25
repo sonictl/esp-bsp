@@ -1,5 +1,5 @@
 description: BSP Display rotation example
 dependencies:
-  esp-box:
+  esp32_p4_function_ev_board:
     version: "*"
-    override_path: "../../../bsp/esp-box"
+    override_path: "../../../bsp/esp32_p4_function_ev_board"

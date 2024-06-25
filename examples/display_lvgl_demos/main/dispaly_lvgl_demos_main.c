@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2021-2023 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2021-2024 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: CC0-1.0
  */
@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
+#include "lvgl.h"
 
 #include "lv_demos.h"
 #include "bsp/esp-bsp.h"
@@ -18,7 +19,8 @@ static char *TAG = "app_main";
 void app_main(void)
 {
     /* Initialize display and LVGL */
-    bsp_display_start();
+    lv_display_t *display = bsp_display_start();
+    //bsp_display_rotate(display, LV_DISPLAY_ROTATION_90);
 
 #if CONFIG_BSP_DISPLAY_LVGL_AVOID_TEAR
     ESP_LOGI(TAG, "Avoid lcd tearing effect");
@@ -35,9 +37,9 @@ void app_main(void)
     ESP_LOGI(TAG, "Display LVGL demo");
     bsp_display_lock(0);
     // lv_demo_widgets();      /* A widgets example */
-    lv_demo_music();        /* A modern, smartphone-like music player demo. */
+    //lv_demo_music();        /* A modern, smartphone-like music player demo. */
     // lv_demo_stress();       /* A stress test for LVGL. */
-    // lv_demo_benchmark();    /* A demo to measure the performance of LVGL or to compare different settings. */
+    lv_demo_benchmark();    /* A demo to measure the performance of LVGL or to compare different settings. */
     bsp_display_unlock();
 
 #if LOG_MEM_INFO

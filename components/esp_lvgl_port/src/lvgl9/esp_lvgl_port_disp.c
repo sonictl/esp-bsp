@@ -17,6 +17,7 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_lvgl_port.h"
 #include "esp_lvgl_port_priv.h"
+#include "rom/ets_sys.h"
 
 #if SOC_PPA_SUPPORTED
 #include "driver/ppa.h"
@@ -424,6 +425,8 @@ static bool lvgl_port_ppa_callback(ppa_client_handle_t ppa_client, ppa_event_dat
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
+    //ets_printf(".");
+
     lvgl_port_display_ctx_t *disp_ctx = (lvgl_port_display_ctx_t *)user_data;
     assert(disp_ctx != NULL);
     xSemaphoreGiveFromISR(disp_ctx->ppa_sem, &xHigherPriorityTaskWoken);
@@ -475,6 +478,8 @@ static void _lvgl_port_transform_monochrome(lv_display_t *display, const lv_area
 static void lvgl_port_flush_callback(lv_display_t *drv, const lv_area_t *area, uint8_t *color_map)
 {
     assert(drv != NULL);
+    assert(area != NULL);
+    assert(color_map != NULL);
     lvgl_port_display_ctx_t *disp_ctx = (lvgl_port_display_ctx_t *)lv_display_get_user_data(drv);
     assert(disp_ctx != NULL);
 
@@ -487,6 +492,10 @@ static void lvgl_port_flush_callback(lv_display_t *drv, const lv_area_t *area, u
     const uint32_t color_type_id = COLOR_TYPE_ID(COLOR_SPACE_RGB, COLOR_PIXEL_RGB565);
     const int w = offsetx2 - offsetx1 + 1;
     const int h = offsety2 - offsety1 + 1;
+
+    if (w <= 0 || h <= 0) {
+        ESP_LOGE(TAG, "Error size");
+    }
 
     /* Screen vertical size */
     int32_t hres = lv_display_get_horizontal_resolution(drv);
@@ -554,11 +563,17 @@ static void lvgl_port_flush_callback(lv_display_t *drv, const lv_area_t *area, u
         .mode = PPA_TRANS_MODE_NON_BLOCKING,
         .user_data = disp_ctx,
     };
-    ppa_do_scale_rotate_mirror(disp_ctx->ppa_srm_handle, &srm_oper_config);
+    esp_err_t err = ppa_do_scale_rotate_mirror(disp_ctx->ppa_srm_handle, &srm_oper_config);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "ppa_do_scale_rotate_mirror error: %d", err);
+    }
     //ESP_LOGW(TAG, "w: %d, h: %d, buff: %ld", w, h, disp_ctx->ppa_buffer_size);
+    ESP_LOGW(TAG, "x1: %d, x2: %d, y1: %d, y2: %d", offsetx1, offsetx2, offsety1, offsety2);
 
+    //ESP_LOGW(TAG, "-");
     /* Waiting for the PPA to complete transmission */
     xSemaphoreTake(disp_ctx->ppa_sem, portMAX_DELAY);
+    //ESP_LOGW(TAG, "_");
 
     color_map = disp_ctx->ppa_buffer;
 #else //SOC_PPA_SUPPORTED
