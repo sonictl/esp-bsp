@@ -18,7 +18,7 @@ LV_IMG_DECLARE(esp_logo)
 
 static lv_disp_t *display;
 static lv_obj_t *lbl_rotation;
-static lv_disp_rotation_t rotation = LV_DISPLAY_ROTATION_90;
+static lv_disp_rotation_t rotation = LV_DISPLAY_ROTATION_0;
 #if BSP_CAPS_IMU
 static icm42670_handle_t imu = NULL;
 #endif
@@ -226,8 +226,6 @@ void app_main(void)
 
     /* Add and show objects on display */
     app_lvgl_display();
-
-    bsp_display_rotate(display, rotation);
 
     ESP_LOGI(TAG, "Example initialization done.");
 
